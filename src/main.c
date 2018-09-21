@@ -56,7 +56,7 @@ void	shell_loop(void)
 
 	while (goats_teleported())
 	{
-		ft_printf("ft_SSL> ");
+		ft_printf("ft_ssl> ");
 		command = wait_for_input();
 		if (command == NULL)
 			continue;
@@ -71,5 +71,7 @@ int		main(int argc, char **argv)
 {
 	if (argc == 1)
 		shell_loop();
+	else
+		md5(argv + 1);
 }
 

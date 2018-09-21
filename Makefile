@@ -6,7 +6,7 @@
 #    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/03/24 10:11:17 by vtarasiu          #+#    #+#              #
-#    Updated: 2018/09/14 17:23:57 by vtarasiu         ###   ########.fr        #
+#    Updated: 2018/09/19 17:53:31 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,16 +21,16 @@ OBJ_DIR = ./obj/
 LIB_DIR = ./printf
 LIB_NAME = libftprintf.a
 
-MAIN_SRC = main.c split/quotes.c split/smart_split.c memory.c
+MAIN_SRC = main.c split/quotes.c split/smart_split.c memory.c executer.c
 
-MD5_DIR = ./md5/
-MD5_SRC = parsing.c
+MD5_DIR = md5/
+MD5_SRC = parsing.c algorithm.c
 
-SHA256_DIR = ./sha256/
+SHA256_DIR = sha256/
 SHA256_SRC = parsing.c
 
 OBJ = $(addprefix $(OBJ_DIR), $(MAIN_SRC:.c=.o)) \
-      $(addprefix $(MD5_DIR), $(MD5_SRC:.c=.o))
+      $(addprefix $(OBJ_DIR)$(MD5_DIR), $(MD5_SRC:.c=.o))
 
 all: $(NAME)
 
@@ -41,8 +41,7 @@ $(NAME): prepare $(OBJ)
 
 prepare:
 	@mkdir -p $(OBJ_DIR)$(MD5_DIR)
-	@mkdir -p $(OBJ_DIR)$(BUILTIN_DIR)
-	@mkdir -p $(OBJ_DIR)$(INTERFACE_DIR)
+	@mkdir -p $(OBJ_DIR)split
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 	gcc $(FLAGS) -I $(HEADER) -o $@ -c $< ;

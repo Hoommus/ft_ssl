@@ -16,9 +16,17 @@ struct s_command	g_commands[] =
 {
 	{"md5", "MD5 message digest", MESSAGE_COMMAND, &md5},
 	{"sha256", "SHA256 message digest", MESSAGE_COMMAND, &md5},
-
+	{"help", "Prints helpful messages", HULLO, &quit},
+	{"exit", "quit", HULLO, &quit},
 	{NULL, NULL, HULLO, NULL}
 };
+
+int					quit(char **args)
+{
+	ft_printf("\n");
+	*args = args[0];
+	exit(1);
+}
 
 int					execute(char **args)
 {
@@ -28,7 +36,7 @@ int					execute(char **args)
 	while (g_commands[i].name != NULL)
 	{
 		if (ft_strcmp(args[0], g_commands[i].name) == 0)
-			return (g_commands[i].function(args));
+			return (g_commands[i].function(args + 1));
 		i++;
 	}
 	return (1);
