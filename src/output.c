@@ -12,32 +12,52 @@
 
 #include "ft_ssl.h"
 
+void		print_usage(char *algo_name)
+{
+	ft_printf("usage: %s [-pqr] [-s string] [files ...]\n", algo_name);
+}
+
+void		print_message(struct s_message *msg, char *input)
+{
+	size_t	i;
+
+	ft_printf("%s", input);
+	i = 0;
+	while (i < msg->bit_size / 8)
+		ft_printf("%2.2x", msg->data[i++]);
+}
+
+void		print_digest_from_msg(struct s_message *msg, size_t digest_size)
+{
+	unsigned char	*c;
+
+	c = (u_int8_t *)&(msg->a);
+	if ((msg->meta->flags & F_QUIET) != F_QUIET &&
+		(msg->meta->flags & F_REVERSE) != F_REVERSE)
+	{
+		if (msg->meta->is_string)
+			ft_printf("%s (\"%s\") = ", msg->meta->algo_name,
+					msg->meta->data_name);
+		else
+			ft_printf("%s (%s) = ", msg->meta->algo_name, msg->meta->data_name);
+	}
+	else if ((msg->meta->flags & F_ECHO) == F_ECHO)
+	{
+		msg->data[msg->meta->data_size] = '\0';
+		ft_printf("%s\n", msg->data);
+	}
+	print_digest(c, digest_size);
+	if ((msg->meta->flags & F_QUIET) != F_QUIET &&
+		(msg->meta->flags & F_REVERSE) == F_REVERSE)
+		ft_printf(" %s ", msg->meta->data_name);
+	ft_printf("\n");
+}
+
 void		print_digest(unsigned char *digest, size_t size)
 {
-	int		i;
+	size_t	i;
 
 	i = 0;
 	while (i < size)
 		ft_printf("%2.2x", digest[i++]);
-}
-
-void		print_file_hash(char *digest, char *data_name, char *algo_name)
-{
-	ft_printf("%s (%s) = %s", algo_name, data_name, digest);
-}
-
-
-void		print_str_hash(char *digest, char *data_name, char *algo_name)
-{
-	ft_printf("%s (\"%s\") = %s", algo_name, data_name, digest);
-}
-
-void		print_quiet(char *digest)
-{
-	ft_printf("%s", digest);
-}
-
-void		print_reverse(char *digest, char *data_name, char *algo_name)
-{
-	ft_printf("%s", digest);
 }

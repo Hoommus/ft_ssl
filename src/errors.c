@@ -4,7 +4,7 @@
 void		print_error(char *cause, char *error)
 {
 	if (cause != 0)
-		ft_printf("ft_ssl: %s: %s", cause, error);
+		ft_dprintf(STDERR_FILENO, "ft_ssl: %s: %s\n", cause, error);
 	else
-		ft_printf("ft_ssl: %s", error);
+		ft_dprintf(STDERR_FILENO, "ft_ssl: %s\n", error);
 }

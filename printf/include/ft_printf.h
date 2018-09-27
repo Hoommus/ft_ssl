@@ -17,8 +17,9 @@
 # include <stdarg.h>
 # include <stdlib.h>
 # include <limits.h>
+# define PRTF int ft_printf(const char *restrict format, ...) __printflike(1, 2)
 
-int				ft_printf(const char *restrict format, ...) __printflike(1, 2);
+PRTF;
 
 /*
 ** Printf variations

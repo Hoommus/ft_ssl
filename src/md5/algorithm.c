@@ -12,7 +12,7 @@
 
 #include "ft_ssl.h"
 
-static const uint32_t		g_shifts[64] =
+static const u_int32_t		g_shifts[64] =
 {
 	7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
 	5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
@@ -20,7 +20,7 @@ static const uint32_t		g_shifts[64] =
 	6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
 };
 
-static const uint32_t		g_keys[64] =
+static const u_int32_t		g_keys[64] =
 {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a,
 	0xa8304613, 0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -35,32 +35,35 @@ static const uint32_t		g_keys[64] =
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-static const uint32_t		g_magic_initial[4] =
+static const u_int32_t		g_magic_initial[4] =
 {
 	0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476
 };
 
-struct s_message	*preprocess(char *str)
+struct s_message	*preprocess(struct s_message *const msg)
 {
-	uint32_t			initial_len;
-	struct s_message	*msg;
+	u_int32_t			byte_len;
+	u_int8_t			*swap;
 
-	msg = ft_memalloc(sizeof(struct s_message));
-	initial_len = ft_strlen(str);
-	msg->bit_size = initial_len * 8 + 1;
+	msg->bit_size = msg->byte_size * 8;
+	msg->meta->data_size = msg->byte_size;
+	byte_len = msg->bit_size / 8;
+	msg->bit_size += 1;
 	while (msg->bit_size % 512 != 448)
 		msg->bit_size++;
-	msg->data = (uint8_t *)ft_strnew((msg->bit_size + 64) / 8);
-	ft_memcpy(msg->data, str, initial_len);
-	msg->data[initial_len] = 128;
-	initial_len = initial_len * 8;
-	ft_memcpy(msg->data + msg->bit_size / 8, &initial_len, 4);
-	//msg->bit_size += 64;
+	swap = (u_int8_t *)ft_strnew((msg->bit_size + 64) / 8);
+	ft_memcpy(swap, msg->data, byte_len);
+	free(msg->data);
+	msg->data = swap;
+	msg->data[byte_len] = 128;
+	byte_len = byte_len * 8;
+	ft_memcpy(msg->data + msg->bit_size / 8, &byte_len, 4);
+	msg->bit_size += 64;
 	return (msg);
 }
 
-void				loop_body(const struct s_message *msg, const uint32_t j,
-													uint32_t *f, uint32_t *g)
+void				loop_body(const struct s_message *msg, const u_int32_t j,
+													u_int32_t *f, u_int32_t *g)
 {
 	if (j < 16)
 	{
@@ -86,13 +89,13 @@ void				loop_body(const struct s_message *msg, const uint32_t j,
 
 void				process_chunk(struct s_message *msg, size_t offset)
 {
-	uint32_t		*chunk;
-	uint32_t		f;
-	uint32_t		g;
-	uint32_t		j;
+	u_int32_t		*chunk;
+	u_int32_t		f;
+	u_int32_t		g;
+	u_int32_t		j;
 
 	j = 0;
-	chunk = (uint32_t *)(msg->data + offset);
+	chunk = (u_int32_t *)(msg->data + offset);
 	while (j < 64)
 	{
 		loop_body(msg, j, &f, &g);
@@ -105,50 +108,50 @@ void				process_chunk(struct s_message *msg, size_t offset)
 	}
 }
 
-void				process_message(struct s_message *msg)
+void				process_message_md5(struct s_message *msg)
 {
-	uint32_t	magic[4];
-	uint32_t	i;
+	u_int32_t	magic[4];
+	u_int32_t	i;
 
 	i = 0;
-	magic[0] = g_magic_initial[0];
-	magic[1] = g_magic_initial[1];
-	magic[2] = g_magic_initial[2];
-	magic[3] = g_magic_initial[3];
+	preprocess(msg);
+	ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
+	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
 	while (i < msg->bit_size / 8)
 	{
-		msg->a = magic[0];
-		msg->b = magic[1];
-		msg->c = magic[2];
-		msg->d = magic[3];
 		process_chunk(msg, i);
 		magic[0] += msg->a;
 		magic[1] += msg->b;
 		magic[2] += msg->c;
 		magic[3] += msg->d;
+		ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
 		i += 64;
 	}
-	msg->a = magic[0];
-	msg->b = magic[1];
-	msg->c = magic[2];
-	msg->d = magic[3];
 }
 
 int					md5(char **args)
 {
 	struct s_message	*msg;
-	char				*data;
-	char				flags;
-	uint32_t			digest_words[4];
-	uint8_t				digest[16];
+	int					i;
+	int					s;
 
-	msg = preprocess(args[0]);
-	process_message(msg);
-	digest_words[0] = msg->a;
-	digest_words[1] = msg->b;
-	digest_words[2] = msg->c;
-	digest_words[3] = msg->d;
-	ft_memcpy(digest, digest_words, sizeof(uint32_t) * 4);
-	print_digest();
+	i = 0;
+	msg = (struct s_message *)ft_memalloc(sizeof(struct s_message));
+	msg->meta = (struct s_meta *)ft_memalloc(sizeof(struct s_meta));
+	msg->meta->algo_name = ALGO_MD5;
+	while (i != -1)
+	{
+		s = choose_operation(msg, args + i);
+		i += s == -1 ? 0 : s;
+		if ((s == 0 && args[i] == NULL))
+			stdin_echo(msg);
+		else if (args[i] != NULL)
+			op_file(msg, args[i]);
+		ft_bzero(&(msg->data), sizeof(struct s_message)
+							- sizeof(struct s_meta *));
+		if (args[i] == NULL || args[++i] == NULL)
+			break ;
+	}
+	chfree_n(2, msg->meta, msg);
 	return (0);
 }

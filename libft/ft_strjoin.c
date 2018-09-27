@@ -32,3 +32,25 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	new[len] = '\0';
 	return (new);
 }
+
+char	*ft_tolerant_strjoin(char const *s1, size_t size1,
+							char const *s2, size_t size2)
+{
+	size_t		new_len;
+	char		*new;
+	size_t		i;
+	size_t		j;
+
+	if (s1 == NULL || s2 == NULL)
+		return (NULL);
+	new_len = size1 + size2;
+	new = ft_strnew(new_len);
+	i = 0;
+	j = 0;
+	while (i < size1)
+		new[j++] = s1[i++];
+	i = 0;
+	while (i < size2)
+		new[j++] = s2[i++];
+	return (new);
+}

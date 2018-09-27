@@ -12,7 +12,7 @@
 
 NAME = ft_ssl
 
-FLAGS = -std=c99 -Wall -Wextra -Werror
+FLAGS = -g -std=c99 -Wall -Wextra -Werror
 
 HEADER = include -I $(LIB_DIR)/include -I libft
 SRC_DIR = ./src/
@@ -21,7 +21,8 @@ OBJ_DIR = ./obj/
 LIB_DIR = ./printf
 LIB_NAME = libftprintf.a
 
-MAIN_SRC = main.c split/quotes.c split/smart_split.c memory.c executer.c
+MAIN_SRC = main.c split/quotes.c split/smart_split.c memory.c executer.c \
+           errors.c output.c parsing.c universal_operations.c
 
 MD5_DIR = md5/
 MD5_SRC = parsing.c algorithm.c
@@ -37,7 +38,7 @@ all: $(NAME)
 $(NAME): prepare $(OBJ)
 	make -C $(LIB_DIR)
 	cp $(LIB_DIR)/$(LIB_NAME) ./$(LIB_NAME)
-	gcc $(FLAGS) -o $(NAME) $(OBJ) -I $(HEADER) $(LIB_NAME) -ltermcap
+	gcc $(FLAGS) -o $(NAME) $(OBJ) -I $(HEADER) $(LIB_NAME)
 
 prepare:
 	@mkdir -p $(OBJ_DIR)$(MD5_DIR)

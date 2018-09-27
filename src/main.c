@@ -56,12 +56,13 @@ void	shell_loop(void)
 
 	while (goats_teleported())
 	{
-		ft_printf("ft_ssl> ");
+		ft_printf("\x1b[37;1mft_SSL>\x1b[0m ");
 		command = wait_for_input();
 		if (command == NULL)
 			continue;
 		args = smart_split(command, LIBFT_WHTSP);
-		execute(args);
+		if (execute(args) == 2)
+			print_error(args[0], "is an invalid command.");
 		free(command);
 		free_array(args);
 	}
@@ -71,7 +72,6 @@ int		main(int argc, char **argv)
 {
 	if (argc == 1)
 		shell_loop();
-	else
-		md5(argv + 1);
+	else if (execute(argv + 1) == 2)
+		print_error(argv[1], "is an invalid command.");
 }
-
