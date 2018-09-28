@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/18 13:20:16 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/28 14:15:44 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,28 @@
 
 struct s_command	g_commands[] =
 {
-	{"md5", "MD5 message digest", MESSAGE_COMMAND, &md5},
-	{"sha256", "SHA256 message digest", MESSAGE_COMMAND, &md5},
-	{"help", "Prints helpful messages", GENERIC_COMMAND, &help},
-	{"exit", "quit", GENERIC_COMMAND, &quit},
-	{"quit", "quit", HIDDEN_COMMAND, &quit},
-	{NULL, NULL, GENERIC_COMMAND, NULL}
+	{
+		"md5", "MD5 message digest",
+		MESSAGE_COMMAND, MD5,
+		&md5, &md5_process_message
+	},
+	{
+		"sha256", "SHA256 message digest",
+		MESSAGE_COMMAND, SHA256,
+		&sha256, &sha256_process_message
+	},
+	{
+		"whirlpool", "SHA256 message digest",
+		MESSAGE_COMMAND, WHIRLPOOL,
+		&sha256, &sha256_process_message
+	},
+	{
+		"help", "Prints helpful messages",
+		GENERIC_COMMAND, WHIRLPOOL, &help, NULL
+	},
+	{"exit", "quit", GENERIC_COMMAND, WHIRLPOOL, &quit, NULL},
+	{"quit", "quit", HIDDEN_COMMAND, WHIRLPOOL, &quit, NULL},
+	{NULL, NULL, HIDDEN_COMMAND, WHIRLPOOL, NULL, NULL}
 };
 
 int					help(char **args)
@@ -30,17 +46,17 @@ int					help(char **args)
 	ft_printf("Message commands:\n");
 	i = -1;
 	while (g_commands[++i].name != NULL)
-		if (g_commands[i].type == MESSAGE_COMMAND)
+		if (g_commands[i].cmd_type == MESSAGE_COMMAND)
 			ft_printf("%s ", g_commands[i].name);
 	i = -1;
 	ft_printf("\nCipher commands: \n");
 	while (g_commands[++i].name != NULL)
-		if (g_commands[i].type == CIPHER_COMMAND)
+		if (g_commands[i].cmd_type == CIPHER_COMMAND)
 			ft_printf("%s ", g_commands[i].name);
 	i = -1;
 	ft_printf("\nGeneric commands: \n");
 	while (g_commands[++i].name != NULL)
-		if (g_commands[i].type == GENERIC_COMMAND)
+		if (g_commands[i].cmd_type == GENERIC_COMMAND)
 			ft_printf("%s ", g_commands[i].name);
 	ft_printf("\n");
 	return (0);
@@ -52,6 +68,25 @@ int					quit(char **args)
 	exit(1);
 }
 
+/*
+** Returns function of type 'void (*) (struct s_message *)'
+*/
+
+void				(*get_message_processor(enum e_algo_type algo_type))
+															(struct s_message *)
+{
+	int		i;
+
+	i = 0;
+	while (g_commands[i].name != NULL)
+	{
+		if (g_commands[i].algo_type == algo_type)
+			return (g_commands[i].message_processor);
+		i++;
+	}
+	return (NULL);
+}
+
 int					execute(char **args)
 {
 	int		i;
@@ -60,7 +95,7 @@ int					execute(char **args)
 	while (g_commands[i].name != NULL)
 	{
 		if (ft_strcmp(args[0], g_commands[i].name) == 0)
-			return (g_commands[i].function(args + 1));
+			return (g_commands[i].entry(args + 1));
 		i++;
 	}
 	return (2);

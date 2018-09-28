@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 13:23:09 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/18 13:50:19 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/28 11:38:39 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void		print_usage(char *algo_name)
 {
-	ft_printf("usage: %s [-pqr] [-s string] [files ...]\n", algo_name);
+	ft_printf("usage: ft_ssl %s [-pqr] [-s string] [files ...]\n", algo_name);
 }
 
 void		print_message(struct s_message *msg, char *input)

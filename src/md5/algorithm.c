@@ -6,13 +6,13 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/19 16:48:28 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/28 14:15:44 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
 
-static const u_int32_t		g_shifts[64] =
+static const u_int32_t	g_shifts[64] =
 {
 	7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
 	5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
@@ -20,7 +20,7 @@ static const u_int32_t		g_shifts[64] =
 	6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
 };
 
-static const u_int32_t		g_keys[64] =
+static const u_int32_t	g_keys[64] =
 {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a,
 	0xa8304613, 0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -35,12 +35,12 @@ static const u_int32_t		g_keys[64] =
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-static const u_int32_t		g_magic_initial[4] =
+static const u_int32_t	g_magic_initial[4] =
 {
 	0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476
 };
 
-struct s_message	*preprocess(struct s_message *const msg)
+struct s_message		*md5_preprocess(struct s_message *const msg)
 {
 	u_int32_t			byte_len;
 	u_int8_t			*swap;
@@ -62,8 +62,8 @@ struct s_message	*preprocess(struct s_message *const msg)
 	return (msg);
 }
 
-void				loop_body(const struct s_message *msg, const u_int32_t j,
-													u_int32_t *f, u_int32_t *g)
+void					md5_loop_body(const struct s_message *msg,
+								const u_int32_t j, u_int32_t *f, u_int32_t *g)
 {
 	if (j < 16)
 	{
@@ -87,7 +87,8 @@ void				loop_body(const struct s_message *msg, const u_int32_t j,
 	}
 }
 
-void				process_chunk(struct s_message *msg, size_t offset)
+void					md5_process_chunk(struct s_message *const msg,
+																size_t offset)
 {
 	u_int32_t		*chunk;
 	u_int32_t		f;
@@ -98,28 +99,28 @@ void				process_chunk(struct s_message *msg, size_t offset)
 	chunk = (u_int32_t *)(msg->data + offset);
 	while (j < 64)
 	{
-		loop_body(msg, j, &f, &g);
+		md5_loop_body(msg, j, &f, &g);
 		f += msg->a + g_keys[j] + chunk[g];
 		msg->a = msg->d;
 		msg->d = msg->c;
 		msg->c = msg->b;
-		msg->b = msg->b + ROTATE_LEFT(f, g_shifts[j]);
+		msg->b = msg->b + ROL(f, g_shifts[j]);
 		j++;
 	}
 }
 
-void				process_message_md5(struct s_message *msg)
+void					md5_process_message(struct s_message *const msg)
 {
 	u_int32_t	magic[4];
 	u_int32_t	i;
 
 	i = 0;
-	preprocess(msg);
+	md5_preprocess(msg);
 	ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
 	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
 	while (i < msg->bit_size / 8)
 	{
-		process_chunk(msg, i);
+		md5_process_chunk(msg, i);
 		magic[0] += msg->a;
 		magic[1] += msg->b;
 		magic[2] += msg->c;
@@ -129,7 +130,7 @@ void				process_message_md5(struct s_message *msg)
 	}
 }
 
-int					md5(char **args)
+int						md5(char **args)
 {
 	struct s_message	*msg;
 	int					i;
@@ -139,6 +140,7 @@ int					md5(char **args)
 	msg = (struct s_message *)ft_memalloc(sizeof(struct s_message));
 	msg->meta = (struct s_meta *)ft_memalloc(sizeof(struct s_meta));
 	msg->meta->algo_name = ALGO_MD5;
+	msg->meta->algo_type = MD5;
 	while (i != -1)
 	{
 		s = choose_operation(msg, args + i);

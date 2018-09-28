@@ -6,7 +6,7 @@
 #    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/03/24 10:11:17 by vtarasiu          #+#    #+#              #
-#    Updated: 2018/09/19 17:53:31 by vtarasiu         ###   ########.fr        #
+#    Updated: 2018/09/28 16:21:12 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,10 +28,14 @@ MD5_DIR = md5/
 MD5_SRC = parsing.c algorithm.c
 
 SHA256_DIR = sha256/
-SHA256_SRC = parsing.c
+SHA256_SRC = algorithm.c
+
+WHIRLPOOL_DIR = whirlpool/
+WHIRLPOOL_SRC = algorithm.c
 
 OBJ = $(addprefix $(OBJ_DIR), $(MAIN_SRC:.c=.o)) \
-      $(addprefix $(OBJ_DIR)$(MD5_DIR), $(MD5_SRC:.c=.o))
+      $(addprefix $(OBJ_DIR)$(MD5_DIR), $(MD5_SRC:.c=.o)) \
+      $(addprefix $(OBJ_DIR)$(SHA256_DIR), $(SHA256_SRC:.c=.o))
 
 all: $(NAME)
 
@@ -41,6 +45,7 @@ $(NAME): prepare $(OBJ)
 	gcc $(FLAGS) -o $(NAME) $(OBJ) -I $(HEADER) $(LIB_NAME)
 
 prepare:
+	@mkdir -p $(OBJ_DIR)$(SHA256_DIR)
 	@mkdir -p $(OBJ_DIR)$(MD5_DIR)
 	@mkdir -p $(OBJ_DIR)split
 

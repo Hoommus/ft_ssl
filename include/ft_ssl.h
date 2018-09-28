@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:36 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/19 15:41:26 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/28 19:20:50 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,18 @@
 # define ISQT(x) (((x) == '\'' || (x) == '"' || (x) == '`') ? (1) : (0))
 # define ISFLAG(arg) ((arg) && (arg)[0] == '-' && (arg)[1] != '\0')
 
-# define ROTATE_LEFT(x, c)  (((x) << (c)) | ((x) >> (32 - (c))))
-# define ROTATE_RIGHT(x, c) (((x) >> (c)) | ((x) << (32 - (c))))
+# define ROL(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
+# define ROR(x, c) (((x) >> (c)) | ((x) << (32 - (c))))
 
-# define F_QUIET    1
-# define F_REVERSE  2
-# define F_ECHO     4
-# define F_HASHED   128
+# define SHA256_CH(e, f, g) (((e) & (f)) ^ ((~(e)) & (g)))
+# define SHA256_MJ(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
+# define SHA256_EP1(e) (ROR((e), 6) ^ ROR((e), 11) ^ ROR((e), 25))
+# define SHA256_EP2(a) (ROR(a, 2) ^ ROR(a, 13) ^ ROR(a, 22))
+
+# define F_QUIET        1
+# define F_REVERSE      2
+# define F_ECHO         4
+# define F_IS_HASHED  128
 
 # define ALGO_MD5       "MD5"
 # define ALGO_SHA256    "SHA256"
@@ -50,14 +55,6 @@ enum					e_cmd_type
 	MESSAGE_COMMAND,
 	GENERIC_COMMAND,
 	HIDDEN_COMMAND
-};
-
-struct					s_command
-{
-	char			*name;
-	char			*description;
-	enum e_cmd_type	type;
-	int				(*function) (char **args);
 };
 
 struct					s_meta
@@ -86,6 +83,16 @@ struct					s_message
 	size_t			byte_size;
 };
 
+struct					s_command
+{
+	char				*name;
+	char				*description;
+	enum e_cmd_type		cmd_type;
+	enum e_algo_type	algo_type;
+	int					(*entry) (char **args);
+	void				(*message_processor) (struct s_message *const msg);
+};
+
 extern struct s_command	g_commands[];
 extern struct s_command	g_algorithms[];
 
@@ -99,6 +106,8 @@ int						execute(char **args);
 int						quit(char **args);
 int						help(char **args);
 int						choose_operation(struct s_message *msg, char **args);
+void					(*get_message_processor(enum e_algo_type algo_type))
+														(struct s_message *);
 
 char					**smart_split(char *str, const char *delimiters);
 int						read_fd(int fd, char **data, size_t *size);
@@ -111,23 +120,24 @@ void					print_usage(char *algo_name);
 void					print_digest(unsigned char *digest, size_t size);
 void					print_digest_from_msg(struct s_message *msg,
 														size_t digest_size);
-void					print_error(char *cause, char *error);
 
+void					print_error(char *cause, char *error);
 /*
 ** universal_operations.c
 */
 void					stdin_echo(struct s_message *msg);
 void					arg_string(struct s_message *msg, char *str);
 void					op_file(struct s_message *msg, char *filename);
-
 /*
  * MD5 -qs
  */
-void					process_message_md5(struct s_message *msg);
+void					md5_process_message(struct s_message *const msg);
 int						md5(char **args);
 
 /*
  * SHA256
  */
+int						sha256(char **args);
+void					sha256_process_message(struct s_message *const msg);
 
 #endif

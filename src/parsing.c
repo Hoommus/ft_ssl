@@ -10,6 +10,7 @@ int			apply_flag(struct s_meta *meta, char c)
 	else
 	{
 		ft_dprintf(2, "ft_ssl: -- %c is an invalid argument.\n", c);
+		print_usage(meta->algo_name);
 		return (-1);
 	}
 	return (0);
