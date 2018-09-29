@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/28 20:30:51 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/29 17:57:19 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,28 +33,38 @@ static const u_int32_t	g_magic_initial[8] =
 	0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
 
+u_int32_t				to_big_endian(u_int32_t val)
+{
+	val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
+	return (val << 16) | (val >> 16);
+}
+
 struct s_message		*sha256_preprocess(struct s_message *const msg)
 {
 	u_int64_t			bit_len;
-	u_int32_t			k;
+	u_int32_t			i;
+	u_int32_t			*padded;
 	u_int8_t			*swap;
 
 	msg->bit_size = msg->byte_size * 8;
 	msg->meta->data_size = msg->byte_size;
 	msg->bit_size += 1;
-	k = 0;
-	while ((msg->bit_size + k + 64) % 512 != 0)
-		k++;
-	msg->bit_size += k;
+	while (msg->bit_size % 512 != 448)
+		msg->bit_size++;
 	swap = (u_int8_t *)ft_strnew((msg->bit_size + 64) / 8);
 	ft_memcpy(swap, msg->data, msg->byte_size);
 	free(msg->data);
 	msg->data = swap;
 	msg->data[msg->byte_size] = 128;
+	padded = (u_int32_t *)msg->data;
+	i = -1;
+	while (++i < (msg->bit_size / 8) / sizeof(u_int32_t))
+		padded[i] = to_big_endian(padded[i]);
 	bit_len = (msg->byte_size * 8);
-	bit_len = (bit_len >> 24) | ((bit_len >> 8) & 0x0000ff00) |
-			((bit_len << 8) & 0x00ff0000) | (bit_len << 24);
-	ft_memcpy(msg->data + msg->bit_size / 8, &bit_len, 8);
+//	bit_len = (bit_len >> 24) | ((bit_len >> 8) & 0x0000ff00) |
+//			((bit_len << 8) & 0x00ff0000) | (bit_len << 24);
+	padded[((msg->bit_size) / 8) / sizeof(u_int32_t) + 1] = to_big_endian(bit_len);
+//	ft_memcpy(msg->data + msg->bit_size / 8, &bit_len, 8);
 	msg->bit_size += 64;
 	return (msg);
 }
@@ -72,6 +82,9 @@ void					sha256_process_chunk(struct s_message *const msg,
 	chunk = (u_int32_t *)(msg->data + offset);
 	j = 15;
 	ft_memcpy(w, chunk, sizeof(u_int32_t) * 16);
+	ft_printf("chunk: \t\t %.8x \t %.8x \t %.8x \t %.8x \t %.8x \t %.8x \t %.8x \t %.8x \n",
+			  chunk[0], chunk[1], chunk[2], chunk[3], chunk[4], chunk[5],
+			  chunk[6], chunk[7]);
 //	j = -1;
 //	while (++j < 16)
 //		w[j] = (chunk[j] >> 24) | ((chunk[j] >> 8) & 0x0000ff00) |
@@ -96,6 +109,8 @@ void					sha256_process_chunk(struct s_message *const msg,
 		msg->c = msg->b;
 		msg->b = msg->a;
 		msg->a = tmp1 + tmp2;
+		ft_printf("comp =  %i \t %08x \t %08x \t %08x \t %08x \t %08x \t %08x \t %08x \t %08x \n",
+				  j, msg->a, msg->b, msg->c, msg->d, msg->e, msg->f, msg->g, msg->h);
 		j++;
 	}
 }
@@ -109,6 +124,9 @@ void					sha256_process_message(struct s_message *const msg)
 	sha256_preprocess(msg);
 	ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 8);
 	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 8);
+	ft_printf("\t\t a \t\t b \t\t c \t\t d \t\t e \t\t f \t\t g \t\t h \n");
+	ft_printf("init: \t\t %x \t %x \t %x \t %x \t %x \t %x \t %x \t %x \n",
+		   msg->a, msg->b, msg->c, msg->d, msg->e, msg->f, msg->g, msg->h);
 	while (i < msg->bit_size / 8)
 	{
 		sha256_process_chunk(msg, i);
@@ -123,6 +141,8 @@ void					sha256_process_message(struct s_message *const msg)
 		ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 8);
 		i += 64;
 	}
+	ft_printf("digest: %x %x %x %x %x %x %x %x\n", msg->a, msg->b, msg->c, msg->d,
+			msg->e, msg->f, msg->g, msg->h);
 }
 
 int						sha256(char **args)
