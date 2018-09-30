@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/28 14:15:44 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/30 10:57:34 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,8 +72,7 @@ int					quit(char **args)
 ** Returns function of type 'void (*) (struct s_message *)'
 */
 
-void				(*get_message_processor(enum e_algo_type algo_type))
-															(struct s_message *)
+t_message_processor	get_message_processor(enum e_algo_type algo_type)
 {
 	int		i;
 

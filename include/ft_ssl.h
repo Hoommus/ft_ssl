@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:36 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/28 19:20:50 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/30 11:24:18 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,8 @@ struct					s_message
 	size_t			byte_size;
 };
 
+typedef void			(*t_message_processor) (struct s_message *);
+
 struct					s_command
 {
 	char				*name;
@@ -90,7 +92,7 @@ struct					s_command
 	enum e_cmd_type		cmd_type;
 	enum e_algo_type	algo_type;
 	int					(*entry) (char **args);
-	void				(*message_processor) (struct s_message *const msg);
+	t_message_processor	message_processor;
 };
 
 extern struct s_command	g_commands[];
@@ -106,38 +108,43 @@ int						execute(char **args);
 int						quit(char **args);
 int						help(char **args);
 int						choose_operation(struct s_message *msg, char **args);
-void					(*get_message_processor(enum e_algo_type algo_type))
-														(struct s_message *);
+t_message_processor		get_message_processor(enum e_algo_type algo_type);
 
 char					**smart_split(char *str, const char *delimiters);
 int						read_fd(int fd, char **data, size_t *size);
 int						read_arg_str(char *arg, char **data, size_t *size);
 int						read_filename(char *file, char **data, size_t *size);
+
 /*
 ** output.c
 */
+
 void					print_usage(char *algo_name);
 void					print_digest(unsigned char *digest, size_t size);
 void					print_digest_from_msg(struct s_message *msg,
 														size_t digest_size);
-
 void					print_error(char *cause, char *error);
+
 /*
 ** universal_operations.c
 */
+
+u_int32_t				swap_endianess(u_int32_t x);
 void					stdin_echo(struct s_message *msg);
 void					arg_string(struct s_message *msg, char *str);
 void					op_file(struct s_message *msg, char *filename);
 /*
- * MD5 -qs
- */
-void					md5_process_message(struct s_message *const msg);
+** MD5 (md5/algorithm.c)
+*/
+
+void					md5_process_message(struct s_message *msg);
 int						md5(char **args);
 
 /*
- * SHA256
- */
+** SHA256
+*/
+
 int						sha256(char **args);
-void					sha256_process_message(struct s_message *const msg);
+void					sha256_process_message(struct s_message *msg);
 
 #endif

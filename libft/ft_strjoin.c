@@ -33,6 +33,10 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	return (new);
 }
 
+/*
+** Tolerant strjoin ignores zero bytes and joins strings by size
+*/
+
 char	*ft_tolerant_strjoin(char const *s1, size_t size1,
 							char const *s2, size_t size2)
 {

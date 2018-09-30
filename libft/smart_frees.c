@@ -45,4 +45,3 @@ void	chfree_n(int n, ...)
 	}
 	va_end(list);
 }
-

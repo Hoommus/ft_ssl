@@ -59,7 +59,6 @@ void	bufferize(char *s, long long len)
 		bufferize(s, len);
 }
 
-
 int		ft_printf(const char *restrict format, ...)
 {
 	va_list		list;
