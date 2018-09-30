@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/30 10:57:34 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/30 11:11:29 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,6 @@ struct s_command	g_commands[] =
 	{
 		"sha256", "SHA256 message digest",
 		MESSAGE_COMMAND, SHA256,
-		&sha256, &sha256_process_message
-	},
-	{
-		"whirlpool", "SHA256 message digest",
-		MESSAGE_COMMAND, WHIRLPOOL,
 		&sha256, &sha256_process_message
 	},
 	{

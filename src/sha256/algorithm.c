@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/30 11:26:47 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/30 12:50:23 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,21 +133,22 @@ int						sha256(char **args)
 	int					s;
 
 	i = 0;
+	s = 0;
 	msg = (struct s_message *)ft_memalloc(sizeof(struct s_message));
 	msg->meta = (struct s_meta *)ft_memalloc(sizeof(struct s_meta));
 	msg->meta->algo_name = ALGO_SHA256;
 	msg->meta->algo_type = SHA256;
 	while (i != -1)
 	{
-		s = choose_operation(msg, args + i);
+		s = choose_operation(msg, args + i, s);
 		i += s == -1 ? 0 : s;
 		if ((s == 0 && args[i] == NULL))
 			stdin_echo(msg);
-		else if (s != -1 && args[i] != NULL)
+		else if (s != -2 && args[i] != NULL && (msg->meta->flags |= F_FH))
 			op_file(msg, args[i]);
 		ft_bzero(&(msg->data), sizeof(struct s_message)
 							- sizeof(struct s_meta *));
-		if (args[i] == NULL || args[++i] == NULL)
+		if (s == -2 || args[i] == NULL || args[++i] == NULL)
 			break ;
 	}
 	chfree_n(2, msg->meta, msg);

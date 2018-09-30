@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:36 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/30 11:24:18 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/30 12:56:43 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,11 @@
 
 # define SHA256_CH(e, f, g) (((e) & (f)) ^ ((~(e)) & (g)))
 # define SHA256_MJ(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
-# define SHA256_EP1(e) (ROR((e), 6) ^ ROR((e), 11) ^ ROR((e), 25))
-# define SHA256_EP2(a) (ROR(a, 2) ^ ROR(a, 13) ^ ROR(a, 22))
 
 # define F_QUIET        1
 # define F_REVERSE      2
 # define F_ECHO         4
-# define F_IS_HASHED  128
+# define F_FH           128
 
 # define ALGO_MD5       "MD5"
 # define ALGO_SHA256    "SHA256"
@@ -96,7 +94,6 @@ struct					s_command
 };
 
 extern struct s_command	g_commands[];
-extern struct s_command	g_algorithms[];
 
 /*
 ** Execute, cannot pardon? Or...
@@ -107,10 +104,12 @@ extern struct s_command	g_algorithms[];
 int						execute(char **args);
 int						quit(char **args);
 int						help(char **args);
-int						choose_operation(struct s_message *msg, char **args);
+int						choose_operation(struct s_message *msg, char **args,
+																		int s);
 t_message_processor		get_message_processor(enum e_algo_type algo_type);
 
 char					**smart_split(char *str, const char *delimiters);
+void					strip_quotes(char **array);
 int						read_fd(int fd, char **data, size_t *size);
 int						read_arg_str(char *arg, char **data, size_t *size);
 int						read_filename(char *file, char **data, size_t *size);

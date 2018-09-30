@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/14 17:21:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/14 17:21:57 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/30 13:38:05 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ void	shell_loop(void)
 		if (command == NULL)
 			continue;
 		args = smart_split(command, LIBFT_WHTSP);
+		strip_quotes(args);
 		if (execute(args) == 2)
 			print_error(args[0], "is an invalid command.");
 		free(command);

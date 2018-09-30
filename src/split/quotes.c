@@ -31,3 +31,12 @@ char	*remove_quotes(char *string)
 	}
 	return (string);
 }
+
+void	strip_quotes(char **array)
+{
+	int		i;
+
+	i = 0;
+	while (array[i])
+		remove_quotes(array[i++]);
+}

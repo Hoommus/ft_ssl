@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 13:23:09 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/28 11:38:39 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2018/09/30 12:19:50 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 
 void		print_usage(char *algo_name)
 {
-	ft_printf("usage: ft_ssl %s [-pqr] [-s string] [files ...]\n", algo_name);
+	ft_printf("usage: ft_ssl %s [-pqr] [-s string] [files ...]\n",
+			ft_tolowercase(algo_name));
+	ft_touppercase(algo_name);
 }
 
 void		print_message(struct s_message *msg, char *input)
@@ -44,7 +46,7 @@ void		print_digest_from_msg(struct s_message *msg, size_t digest_size)
 	else if ((msg->meta->flags & F_ECHO) == F_ECHO)
 	{
 		msg->data[msg->meta->data_size] = '\0';
-		ft_printf("%s\n", msg->data);
+		ft_printf("%s", msg->data);
 	}
 	print_digest(c, digest_size);
 	if ((msg->meta->flags & F_QUIET) != F_QUIET &&

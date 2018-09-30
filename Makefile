@@ -6,13 +6,13 @@
 #    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/03/24 10:11:17 by vtarasiu          #+#    #+#              #
-#    Updated: 2018/09/28 16:21:12 by vtarasiu         ###   ########.fr        #
+#    Updated: 2018/09/30 12:50:42 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ft_ssl
 
-FLAGS = -g -std=c99 -Wall -Wextra -Werror
+FLAGS = -std=c99 -Wall -Wextra -Werror
 
 HEADER = include -I $(LIB_DIR)/include -I libft
 SRC_DIR = ./src/
@@ -21,17 +21,14 @@ OBJ_DIR = ./obj/
 LIB_DIR = ./printf
 LIB_NAME = libftprintf.a
 
-MAIN_SRC = main.c split/quotes.c split/smart_split.c memory.c executer.c \
+MAIN_SRC = main.c split/quotes.c split/smart_split.c executer.c \
            errors.c output.c parsing.c universal_operations.c
 
 MD5_DIR = md5/
-MD5_SRC = parsing.c algorithm.c
+MD5_SRC = algorithm.c
 
 SHA256_DIR = sha256/
 SHA256_SRC = algorithm.c
-
-WHIRLPOOL_DIR = whirlpool/
-WHIRLPOOL_SRC = algorithm.c
 
 OBJ = $(addprefix $(OBJ_DIR), $(MAIN_SRC:.c=.o)) \
       $(addprefix $(OBJ_DIR)$(MD5_DIR), $(MD5_SRC:.c=.o)) \
