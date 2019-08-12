@@ -3,16 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/03/24 10:11:17 by vtarasiu          #+#    #+#              #
-#    Updated: 2018/09/30 12:50:42 by vtarasiu         ###   ########.fr        #
+#    Updated: 2019/08/12 18:15:29 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ft_ssl
 
-FLAGS = -std=c99 -Wall -Wextra -Werror
+FLAGS = -std=c11 -Wall -Wextra -Werror \
+		-g3 -fsanitize=address
 
 HEADER = include -I $(LIB_DIR)/include -I libft
 SRC_DIR = ./src/
@@ -21,8 +22,9 @@ OBJ_DIR = ./obj/
 LIB_DIR = ./printf
 LIB_NAME = libftprintf.a
 
-MAIN_SRC = main.c split/quotes.c split/smart_split.c executer.c \
-           errors.c output.c parsing.c universal_operations.c
+MAIN_SRC = main.c split/quotes.c split/smart_split.c executor.c \
+           errors.c output.c parsing.c universal_operations.c \
+           auxilary.c processor.c
 
 MD5_DIR = md5/
 MD5_SRC = algorithm.c

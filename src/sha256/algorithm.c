@@ -3,14 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   algorithm.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/30 12:50:23 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/07 18:51:11 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
+
+#define ROR(x, c) (((x) >> (c)) | ((x) << (32 - (c))))
+
+#define SHA256_CH(e, f, g) (((e) & (f)) ^ ((~(e)) & (g)))
+#define SHA256_MJ(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
+
 
 static const u_int32_t	g_keys[64] =
 {
@@ -41,7 +47,7 @@ struct s_message		*sha256_preprocess(struct s_message *const msg)
 	u_int64_t chunks;
 
 	msg->bit_size = msg->byte_size * 8;
-	msg->meta->data_size = msg->byte_size;
+	msg->meta.data_size = msg->byte_size;
 	chunks = 1 + ((msg->bit_size + 16 + 64) / 512);
 	padded = ft_memalloc(16 * chunks * 32);
 	ft_memcpy(padded, msg->data, msg->byte_size);
@@ -128,29 +134,5 @@ void					sha256_process_message(struct s_message *const msg)
 
 int						sha256(char **args)
 {
-	struct s_message	*msg;
-	int					i;
-	int					s;
-
-	i = 0;
-	s = 0;
-	msg = (struct s_message *)ft_memalloc(sizeof(struct s_message));
-	msg->meta = (struct s_meta *)ft_memalloc(sizeof(struct s_meta));
-	msg->meta->algo_name = ALGO_SHA256;
-	msg->meta->algo_type = SHA256;
-	while (i != -1)
-	{
-		s = choose_operation(msg, args + i, s);
-		i += s == -1 ? 0 : s;
-		if ((s == 0 && args[i] == NULL))
-			stdin_echo(msg);
-		else if (s != -2 && args[i] != NULL && (msg->meta->flags |= F_FH))
-			op_file(msg, args[i]);
-		ft_bzero(&(msg->data), sizeof(struct s_message)
-							- sizeof(struct s_meta *));
-		if (s == -2 || args[i] == NULL || args[++i] == NULL)
-			break ;
-	}
-	chfree_n(2, msg->meta, msg);
-	return (0);
+	return (args == NULL);
 }

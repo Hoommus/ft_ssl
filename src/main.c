@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/14 17:21:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/30 13:38:05 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/07 15:51:58 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ char	*wait_for_input(void)
 {
 	char	*line;
 
-	while (goats_teleported())
+	while (true)
 	{
 		if (get_next_line(STDIN_FILENO, &line) > 0)
 		{
@@ -46,7 +46,6 @@ char	*wait_for_input(void)
 			return (line);
 		}
 	}
-	return (NULL);
 }
 
 void	shell_loop(void)
@@ -62,7 +61,7 @@ void	shell_loop(void)
 			continue;
 		args = smart_split(command, LIBFT_WHTSP);
 		strip_quotes(args);
-		if (execute(args) == 2)
+		if (execute(args) == -128)
 			print_error(args[0], "is an invalid command.");
 		free(command);
 		free_array(args);
@@ -73,6 +72,6 @@ int		main(int argc, char **argv)
 {
 	if (argc == 1)
 		shell_loop();
-	else if (execute(argv + 1) == 2)
+	else if (execute(argv + 1) == -128)
 		print_error(argv[1], "is an invalid command.");
 }

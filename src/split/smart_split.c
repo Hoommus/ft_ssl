@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   smart_split.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:54 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/18 11:41:00 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/12 18:19:14 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,14 @@
 int			count_substrings(const char *const str, const char *delimiters)
 {
 	ssize_t	i;
+	ssize_t	len;
 	int		subs;
 	char	c;
 
+	len = ft_strlen(str);
 	subs = 0;
 	i = -1;
-	while (str && str[++i])
+	while (++i < len)
 	{
 		c = str[i];
 		if (ft_strchr(LIBFT_WHTSP, str[i]) != NULL && ++i)

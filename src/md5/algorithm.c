@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   algorithm.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2018/09/28 14:15:44 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/12 20:47:22 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
+
+#define ROL(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
 
 static const u_int32_t	g_shifts[64] =
 {
@@ -42,22 +44,20 @@ static const u_int32_t	g_magic_initial[4] =
 
 struct s_message		*md5_preprocess(struct s_message *const msg)
 {
-	u_int32_t			byte_len;
 	u_int8_t			*swap;
+	const u_int64_t		bit_size = msg->meta.data_size * 8;
 
-	msg->bit_size = msg->byte_size * 8;
-	msg->meta->data_size = msg->byte_size;
-	byte_len = msg->bit_size / 8;
+	msg->bit_size = msg->meta.data_size * 8;
+	msg->byte_size = msg->meta.data_size;
 	msg->bit_size += 1;
 	while (msg->bit_size % 512 != 448)
 		msg->bit_size++;
 	swap = (u_int8_t *)ft_strnew((msg->bit_size + 64) / 8);
-	ft_memcpy(swap, msg->data, byte_len);
-	free(msg->data);
+	ft_memcpy(swap, msg->data, msg->byte_size);
+	//free(msg->data);
 	msg->data = swap;
-	msg->data[byte_len] = 128;
-	byte_len = byte_len * 8;
-	ft_memcpy(msg->data + msg->bit_size / 8, &byte_len, 4);
+	msg->data[msg->byte_size] = 128;
+	ft_memcpy(msg->data + msg->bit_size / 8, &(bit_size), 4);
 	msg->bit_size += 64;
 	return (msg);
 }
@@ -109,12 +109,26 @@ void					md5_process_chunk(struct s_message *const msg,
 	}
 }
 
-void					md5_process_message(struct s_message *const msg)
+void					md5_iterative(struct s_processable *const message)
 {
-	u_int32_t	magic[4];
-	u_int32_t	i;
+	static u_int32_t		magic[4];
+	struct s_message		*msg;
+
+	msg = (struct s_message *)message;
+	if (msg->a == 0 && msg->b == 0 && msg->c == 0 && msg->d == 0)
+		ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
+	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
+	md5_process_chunk(msg, 0);
+}
+
+void					md5_oneshot(struct s_processable *const message)
+{
+	struct s_message	*msg;
+	u_int32_t			magic[4];
+	u_int32_t			i;
 
 	i = 0;
+	msg = (struct s_message *)message;
 	md5_preprocess(msg);
 	ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
 	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
@@ -128,33 +142,5 @@ void					md5_process_message(struct s_message *const msg)
 		ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
 		i += 64;
 	}
-}
-
-int						md5(char **args)
-{
-	struct s_message	*msg;
-	int					i;
-	int					s;
-
-	i = 0;
-	s = 0;
-	msg = (struct s_message *)ft_memalloc(sizeof(struct s_message));
-	msg->meta = (struct s_meta *)ft_memalloc(sizeof(struct s_meta));
-	msg->meta->algo_name = ALGO_MD5;
-	msg->meta->algo_type = MD5;
-	while (i != -1)
-	{
-		s = choose_operation(msg, args + i, s);
-		i += s == -1 ? 0 : s;
-		if ((s == 0 && args[i] == NULL))
-			stdin_echo(msg);
-		else if (s != -2 && args[i] != NULL)
-			op_file(msg, args[i]);
-		ft_bzero(&(msg->data), sizeof(struct s_message)
-							- sizeof(struct s_meta *));
-		if (s == -2 || args[i] == NULL || args[++i] == NULL)
-			break ;
-	}
-	chfree_n(2, msg->meta, msg);
-	return (0);
+//	ft_bzero(&(msg->a), sizeof(u_int32_t) * 4);
 }
