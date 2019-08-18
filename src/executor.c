@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/12 18:13:58 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/13 19:09:20 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,76 +21,90 @@ static struct option	g_base_opts[] =
 	{NULL,       0,                  NULL,  0 }
 };
 
-static struct s_meta	g_md5_meta =
-{
-	.data_name = NULL,
-	.flags = 0,
-	.algo_type = MD5,
-	.algo_name = ALGO_MD5,
-	.data_size = 0,
-	.is_string = false,
-	.block_bit_size = 512,
-	.digest_bit_size = 128,
-};
-
 static struct s_command	g_commands[] =
 {
 	{
 		"md5", "MD5 message digest",
-		MESSAGE_COMMAND, MD5,
+		MESSAGE_COMMAND,
 		.cmd_executor = NULL,
-		.iterative = &md5_iterative,
-		.oneshot = &md5_oneshot,
-		.options = g_base_opts
+		.iterative = md5_iterative,
+		.oneshot = md5_oneshot,
+		.options = g_base_opts,
+		.meta = {
+			.algo_type = TYPE_MD5,
+			.algo_name = ALGO_MD5,
+			.block_bit_size = 512,
+			.digest_bit_size = 128,
+		}
 	},
 	{
 		"sha256", "SHA256 message digest",
-		MESSAGE_COMMAND, SHA256,
+		MESSAGE_COMMAND,
 		.cmd_executor = NULL,
-		.iterative = NULL,
-		.oneshot = NULL,
-		.options = g_base_opts
+		.iterative = sha256_iterative,
+		.oneshot = sha256_oneshot,
+		.options = g_base_opts,
+		.meta = {
+			.algo_type = TYPE_SHA256,
+			.algo_name = ALGO_SHA256,
+			.block_bit_size = 512,
+			.digest_bit_size = 256,
+		}
 	},
 	{
 		.name = "whirlpool",
 		.description = "WHIRLPOOL message digest",
 		.cmd_type = MESSAGE_COMMAND,
-		.algo_type = WHIRLPOOL,
 		.iterative = NULL,
 		.oneshot = NULL,
-		.options = g_base_opts
+		.options = g_base_opts,
+		.meta = {
+			.algo_type = TYPE_WHIRLPOOL,
+			.algo_name = ALGO_WHIRLPOOL,
+			.block_bit_size = 512,
+			.digest_bit_size = 512,
+		}
 	},
 	{
 		.name = "help",
 		.description = "Prints helpful messages",
 		.cmd_type = GENERIC_COMMAND,
-		.algo_type = TYPE_NOT_APPLICABLE,
 		.cmd_executor = &help,
 		.iterative = NULL,
 		.oneshot = NULL,
-		.options = g_base_opts
+		.options = g_base_opts,
+		.meta = {0}
 	},
 	{
 		.name = "exit",
 		.description = "Prints helpful messages",
 		.cmd_type = GENERIC_COMMAND,
-		.algo_type = TYPE_NOT_APPLICABLE,
 		.cmd_executor = &quit,
 		.iterative = NULL,
 		.oneshot = NULL,
-		.options = NULL
+		.options = NULL,
+		.meta = {0}
 	},
 	{
 		.name = "quit",
 		.description = "Prints helpful messages",
 		.cmd_type = HIDDEN_COMMAND,
-		.algo_type = TYPE_NOT_APPLICABLE,
 		.cmd_executor = &quit,
 		.iterative = NULL,
 		.oneshot = NULL,
-		.options = NULL
+		.options = NULL,
+		.meta = {0}
 	},
-	{NULL, NULL, HIDDEN_COMMAND, TYPE_NOT_APPLICABLE, NULL, NULL, NULL, NULL}
+	{
+		.name = NULL,
+		.description = NULL,
+		.cmd_type = HIDDEN_COMMAND,
+		.cmd_executor = NULL,
+		.iterative = NULL,
+		.oneshot = NULL,
+		.options = NULL,
+		.meta = {0}
+	}
 };
 
 int					help(char **args)
@@ -123,8 +137,11 @@ void				(*get_processor(enum e_algo_type t, bool oneshot))(struct s_processable 
 
 	i = 0;
 	while (g_commands[i].name)
-		if (g_commands[i].algo_type == t)
+	{
+		if (g_commands[i].meta.algo_type == t)
 			return (oneshot ? g_commands[i].oneshot : g_commands[i].iterative);
+		i++;
+	}
 	return (NULL);
 }
 
@@ -151,7 +168,7 @@ int					prepare_n_exec(struct s_command *cmd, char **args)
 	}
 	else
 		return (-1);
-	generic->meta = g_md5_meta;
+	generic->meta = cmd->meta;
 	status = process(generic, args, cmd->options);
 	free(generic);
 	return (status);
@@ -166,9 +183,10 @@ int					execute(char **args)
 	{
 		if (ft_strcmp(args[0], g_commands[i].name) == 0)
 		{
-			if (g_commands[i].algo_type != TYPE_NOT_APPLICABLE)
+			if (g_commands[i].meta.algo_type != TYPE_NOT_APPLICABLE)
 				return (prepare_n_exec(g_commands + i, args));
-			return (g_commands[i].cmd_executor(args + 1));
+			else
+				return (g_commands[i].cmd_executor(args + 1));
 		}
 		i++;
 	}

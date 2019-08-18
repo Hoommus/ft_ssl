@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/12 20:47:22 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/13 20:04:13 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,27 +42,34 @@ static const u_int32_t	g_magic_initial[4] =
 	0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476
 };
 
-struct s_message		*md5_preprocess(struct s_message *const msg)
+static struct s_message	*md5_preprocess(struct s_message *const msg)
 {
-	u_int8_t			*swap;
-	const u_int64_t		bit_size = msg->meta.data_size * 8;
+	u_int8_t *swap;
+	const u_int64_t bit_size = msg->meta.whole_size * 8;
 
-	msg->bit_size = msg->meta.data_size * 8;
-	msg->byte_size = msg->meta.data_size;
+	msg->bit_size = bit_size;
 	msg->bit_size += 1;
 	while (msg->bit_size % 512 != 448)
 		msg->bit_size++;
-	swap = (u_int8_t *)ft_strnew((msg->bit_size + 64) / 8);
-	ft_memcpy(swap, msg->data, msg->byte_size);
-	//free(msg->data);
+	if (msg->meta.data_size < msg->meta.block_bit_size / 8)
+	{
+		swap = (u_int8_t *)ft_strnew((msg->meta.block_bit_size / 8));
+		ft_memcpy(swap + 56, &bit_size, 8);
+	}
+	else
+	{
+		swap = (u_int8_t *)ft_strnew((msg->bit_size + 64) / 8);
+		ft_memcpy(swap + msg->bit_size / 8, &bit_size, 8);
+	}
+	swap[msg->meta.data_size] = 128;
+	ft_memcpy(swap, msg->data, msg->meta.data_size);
+	free(msg->data);
 	msg->data = swap;
-	msg->data[msg->byte_size] = 128;
-	ft_memcpy(msg->data + msg->bit_size / 8, &(bit_size), 4);
 	msg->bit_size += 64;
 	return (msg);
 }
 
-void					md5_loop_body(const struct s_message *msg,
+static void				md5_loop_body(const struct s_message *msg,
 								const u_int32_t j, u_int32_t *f, u_int32_t *g)
 {
 	if (j < 16)
@@ -87,7 +94,7 @@ void					md5_loop_body(const struct s_message *msg,
 	}
 }
 
-void					md5_process_chunk(struct s_message *const msg,
+static void				md5_process_chunk(struct s_message *const msg,
 																size_t offset)
 {
 	u_int32_t		*chunk;
@@ -109,30 +116,38 @@ void					md5_process_chunk(struct s_message *const msg,
 	}
 }
 
-void					md5_iterative(struct s_processable *const message)
+void					md5_iterative(struct s_processable *const generic)
 {
 	static u_int32_t		magic[4];
 	struct s_message		*msg;
 
-	msg = (struct s_message *)message;
+	msg = (struct s_message *)generic;
 	if (msg->a == 0 && msg->b == 0 && msg->c == 0 && msg->d == 0)
 		ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
 	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
+	if (msg->meta.data_size < (msg->meta.block_bit_size / 8))
+		md5_preprocess(msg);
 	md5_process_chunk(msg, 0);
+	magic[0] += msg->a;
+	magic[1] += msg->b;
+	magic[2] += msg->c;
+	magic[3] += msg->d;
+	if (msg->meta.data_size < (msg->meta.block_bit_size / 8))
+		ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
 }
 
-void					md5_oneshot(struct s_processable *const message)
+void					md5_oneshot(struct s_processable *const generic)
 {
 	struct s_message	*msg;
 	u_int32_t			magic[4];
 	u_int32_t			i;
 
 	i = 0;
-	msg = (struct s_message *)message;
+	msg = (struct s_message *)generic;
 	md5_preprocess(msg);
 	ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
 	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
-	while (i < msg->bit_size / 8)
+	while (i < msg->meta.whole_size)
 	{
 		md5_process_chunk(msg, i);
 		magic[0] += msg->a;

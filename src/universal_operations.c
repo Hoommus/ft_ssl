@@ -20,11 +20,11 @@ u_int32_t	swap_endianess(u_int32_t x)
 
 int			get_digest_size(enum e_algo_type t)
 {
-	if (t == MD5)
+	if (t == TYPE_MD5)
 		return (4);
-	else if (t == SHA256)
+	else if (t == TYPE_SHA256)
 		return (8);
-	else if (t == WHIRLPOOL)
+	else if (t == TYPE_WHIRLPOOL)
 		return (8);
 	else
 		return (1);

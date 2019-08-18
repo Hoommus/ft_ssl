@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:36 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/12 18:15:03 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/13 19:38:51 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include <errno.h>
 # include <sys/stat.h>
 # include <stdbool.h>
+# include <stdint.h>
+# include <stddef.h>
 # include <getopt.h>
 # include "libft.h"
 # include "ft_printf.h"
@@ -29,6 +31,7 @@
 # define F_QUIET        1U
 # define F_REVERSE      2U
 # define F_ECHO         4U
+# define F_STRING       8U
 # define F_FH           128U
 
 # define ALGO_MD5       "MD5"
@@ -41,10 +44,10 @@
 
 enum					e_algo_type
 {
-	MD5,
-	SHA256,
-	WHIRLPOOL,
-	TYPE_NOT_APPLICABLE
+	TYPE_NOT_APPLICABLE = 0,
+	TYPE_MD5 = 1,
+	TYPE_SHA256 = 2,
+	TYPE_WHIRLPOOL = 3,
 };
 
 enum					e_cmd_type
@@ -61,9 +64,9 @@ struct			s_meta
 	char				*data_name;
 	const char			*algo_name;
 	enum e_algo_type	algo_type;
-	u_int8_t			is_string;
 	u_int8_t			flags;
-	size_t				data_size;
+	__uint128_t			data_size;
+	__uint128_t			whole_size;
 	size_t				block_bit_size;
 	size_t				digest_bit_size;
 };
@@ -90,9 +93,8 @@ struct					s_message
 	u_int32_t		f;
 	u_int32_t		g;
 	u_int32_t		h;
-	size_t			bit_size;
-	size_t			byte_size;
-} __attribute__((aligned(16)));
+	__uint128_t		bit_size;
+};
 
 struct					s_cipher
 {
@@ -120,6 +122,7 @@ struct					s_command
 	int					(*cmd_executor)(char **args);
 	void				(*iterative)(struct s_processable *generic);
 	void				(*oneshot)(struct s_processable *generic);
+	struct s_meta		meta;
 	struct option		*options;
 };
 
@@ -127,14 +130,14 @@ void					(*get_processor(enum e_algo_type t, bool oneshot))
 	(struct s_processable *);
 
 int						execute(char **args);
-int						process(t_processable *processable, char **argv,
+int						process(t_processable *generic, char **argv,
 	 struct option *longopts);
 int						quit(char **args);
 int						help(char **args);
 
 char					**smart_split(char *str, const char *delimiters);
 void					strip_quotes(char **array);
-int						read_fd(int fd, char **data, size_t *size);
+int						read_fd(int fd, char **result, __uint128_t *size);
 
 /*
 ** output.c
@@ -152,18 +155,18 @@ void					print_error(char *cause, char *error);
 u_int32_t				swap_endianess(u_int32_t x);
 
 /*
-** MD5 (md5/algorithm.c)
+** TYPE_MD5 (md5/algorithm.c)
 */
 
-void					md5_oneshot(struct s_processable *const msg);
-void					md5_iterative(struct s_processable *message);
+void					md5_oneshot(struct s_processable *const generic);
+void					md5_iterative(struct s_processable *generic);
 
 /*
-** SHA256
+** TYPE_SHA256
 */
 
-int						sha256(char **args);
-void					sha256_process_message(struct s_message *msg);
+void					sha256_oneshot(struct s_processable *const generic);
+void					sha256_iterative(struct s_processable *const generic);
 
 /*
 ** Auxiliary

@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/07 18:51:11 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/13 13:01:09 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 
 #define SHA256_CH(e, f, g) (((e) & (f)) ^ ((~(e)) & (g)))
 #define SHA256_MJ(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
-
 
 static const u_int32_t	g_keys[64] =
 {
@@ -39,31 +38,31 @@ static const u_int32_t	g_magic_initial[8] =
 	0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
 
-struct s_message		*sha256_preprocess(struct s_message *const msg)
+static struct s_message	*sha256_preprocess(struct s_message *const msg)
 {
-	u_int64_t bit_len;
-	u_int32_t i;
-	u_int32_t *padded;
-	u_int64_t chunks;
+	const __uint128_t	bit_len = msg->meta.whole_size * 8;
+	u_int32_t			i;
+	u_int32_t			*padded;
+	u_int64_t			chunks;
 
-	msg->bit_size = msg->byte_size * 8;
-	msg->meta.data_size = msg->byte_size;
+	asm("mov rdx, rax");
+	msg->bit_size = bit_len;
 	chunks = 1 + ((msg->bit_size + 16 + 64) / 512);
 	padded = ft_memalloc(16 * chunks * 32);
-	ft_memcpy(padded, msg->data, msg->byte_size);
+	if (msg->meta.data_size < UINT64_MAX)
+		ft_memcpy(padded, msg->data, msg->meta.data_size);
 	free(msg->data);
 	msg->data = (u_int8_t *)padded;
-	msg->data[msg->byte_size] = 0x80;
+	msg->data[msg->meta.data_size] = 128;
 	i = -1;
 	while (++i < (chunks * 16) - 1)
 		padded[i] = swap_endianess(padded[i]);
-	bit_len = (msg->byte_size * 8);
 	padded[((chunks * 512 - 64) / 32) + 1] = bit_len;
 	msg->bit_size += 64;
 	return (msg);
 }
 
-void					extend_words(u_int8_t *data, u_int32_t w[64])
+static void				extend_words(u_int8_t *data, u_int32_t w[64])
 {
 	int		j;
 
@@ -75,7 +74,7 @@ void					extend_words(u_int8_t *data, u_int32_t w[64])
 				w[j - 16] + w[j - 7];
 }
 
-void					sha256_process_chunk(struct s_message *const msg,
+static void				sha256_process_chunk(struct s_message *const msg,
 																size_t offset)
 {
 	u_int32_t		w[64];
@@ -83,7 +82,7 @@ void					sha256_process_chunk(struct s_message *const msg,
 	u_int32_t		tmp2;
 	u_int32_t		j;
 
-	ft_bzero(w, sizeof(u_int32_t) * 64);
+	ft_bzero(w, sizeof(w));
 	extend_words(msg->data + offset, w);
 	j = 0;
 	while (j < 64)
@@ -104,10 +103,11 @@ void					sha256_process_chunk(struct s_message *const msg,
 	}
 }
 
-void					sha256_process_message(struct s_message *const msg)
+void					sha256_oneshot(struct s_processable *const generic)
 {
-	u_int32_t	h[8];
-	u_int32_t	i;
+	struct s_message *const	msg = (struct s_message *)generic;
+	u_int32_t				h[8];
+	u_int32_t				i;
 
 	i = 0;
 	sha256_preprocess(msg);
@@ -132,7 +132,27 @@ void					sha256_process_message(struct s_message *const msg)
 		*(&(msg->a) + i) = swap_endianess(*(&(msg->a) + i));
 }
 
-int						sha256(char **args)
+void					sha256_iterative(struct s_processable *const generic)
 {
-	return (args == NULL);
+	static u_int32_t		h[8];
+	struct s_message		*msg;
+	int						i;
+
+	msg = (struct s_message *)generic;
+	if (ft_memcmp(&(msg->a), &((unsigned int[8]){0}), 0) == 0)
+		ft_memcpy(h, g_magic_initial, sizeof(u_int32_t) * 8);
+	ft_memcpy(&(msg->a), h, sizeof(u_int32_t) * 8);
+	if (msg->meta.data_size < (msg->meta.block_bit_size / 8))
+		sha256_preprocess(msg);
+	sha256_process_chunk(msg, 0);
+	i = -1;
+	while (++i < 8)
+		h[i] += *(&(msg->a) + i);
+	if (msg->meta.data_size < (msg->meta.block_bit_size / 8))
+	{
+		ft_memcpy(&(msg->a), h, sizeof(u_int32_t) * 8);
+		i = -1;
+		while (++i < 8)
+			*(&(msg->a) + i) = swap_endianess(*(&(msg->a) + i));
+	}
 }

@@ -14,9 +14,9 @@
 
 const static char	*g_algo_names[] =
 {
-	"MD5",
-	"SHA256",
-	"WHIRLPOOL"
+	"TYPE_MD5",
+	"TYPE_SHA256",
+	"TYPE_WHIRLPOOL"
 };
 
 const char			*algo_name(enum e_algo_type type)

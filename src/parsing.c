@@ -12,7 +12,7 @@
 
 #include "ft_ssl.h"
 
-int			read_fd(int fd, char **result, size_t *size)
+int			read_fd(int fd, char **result, __uint128_t *size)
 {
 	char		buffer[1025];
 	char		*data;

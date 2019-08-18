@@ -39,7 +39,7 @@ void print_digest_from_msg(struct s_message *msg)
 	if ((msg->meta.flags & F_QUIET) != F_QUIET &&
 		(msg->meta.flags & F_REVERSE) != F_REVERSE)
 	{
-		if (msg->meta.is_string)
+		if (msg->meta.flags & F_STRING)
 			ft_printf("%s (\"%s\") = ", msg->meta.algo_name,
 					msg->meta.data_name);
 		else
