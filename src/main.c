@@ -59,11 +59,6 @@ noreturn void	shell_loop(void)
 
 int		main(int argc, char **argv)
 {
-	ft_printf("int128_t size: %lu\n", sizeof(__int128_t));
-	ft_printf("int128 size: %lu\n", sizeof(__int128));
-	ft_printf("uint128_t size: %lu\n", sizeof(__uint128_t));
-	ft_printf("s_message size: %lu\n", sizeof(struct s_message));
-
 	if (argc == 1)
 		shell_loop();
 	else if (execute(argv + 1) == -128)

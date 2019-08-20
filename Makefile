@@ -3,17 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+         #
+#    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/03/24 10:11:17 by vtarasiu          #+#    #+#              #
-#    Updated: 2019/08/17 21:53:18 by vtarasiu         ###   ########.fr        #
+#    Updated: 2019/08/19 17:37:37 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ft_ssl
 
 FLAGS = -std=c11 -Wall -Wextra -Werror \
-		-g3 -fsanitize=address
+		-g3 -Wno-unknown-pragmas
 
 HEADER = include -I $(LIB_DIR)/include -I libft
 SRC_DIR = ./src/
@@ -24,7 +24,7 @@ LIB_NAME = libftprintf.a
 
 MAIN_SRC = main.c split/quotes.c split/smart_split.c executor.c \
            errors.c output.c parsing.c universal_operations.c \
-           auxilary.c processor.c
+           processor.c
 
 MD5_DIR = md5/
 MD5_SRC = algorithm.c
@@ -32,9 +32,14 @@ MD5_SRC = algorithm.c
 SHA256_DIR = sha256/
 SHA256_SRC = algorithm.c
 
+WHIRLPOOL_DIR = whirlpool/
+WHIRLPOOL_SRC = whirlpool.c \
+                whirlpool_sbox.c
+
 OBJ = $(addprefix $(OBJ_DIR), $(MAIN_SRC:.c=.o)) \
       $(addprefix $(OBJ_DIR)$(MD5_DIR), $(MD5_SRC:.c=.o)) \
-      $(addprefix $(OBJ_DIR)$(SHA256_DIR), $(SHA256_SRC:.c=.o))
+      $(addprefix $(OBJ_DIR)$(SHA256_DIR), $(SHA256_SRC:.c=.o)) \
+      $(addprefix $(OBJ_DIR)$(WHIRLPOOL_DIR), $(WHIRLPOOL_SRC:.c=.o))
 
 all: $(NAME)
 
@@ -44,6 +49,7 @@ $(NAME): prepare $(OBJ)
 	gcc $(FLAGS) -o $(NAME) $(OBJ) -I $(HEADER) $(LIB_NAME)
 
 prepare:
+	@mkdir -p $(OBJ_DIR)$(WHIRLPOOL_DIR)
 	@mkdir -p $(OBJ_DIR)$(SHA256_DIR)
 	@mkdir -p $(OBJ_DIR)$(MD5_DIR)
 	@mkdir -p $(OBJ_DIR)split
@@ -57,20 +63,6 @@ clean:
 	@/bin/rm -rf $(OBJ)
 	/bin/rm -rf $(OBJ_DIR)
 
-norme:
-	@echo "<<<===========>>>"
-	norminette $(wildcard $(SRC_DIR)*.c)
-	@echo "<<<===========>>>"
-	norminette $(HEADER)
-	@echo "<<<===========>>>"
-	norminette $(wildcard $(LIB_DIR)/src/*.c)
-	@echo "<<<===========>>>"
-	norminette $(wildcard $(LIB_DIR)/include/*.h)
-	@echo "<<<===========>>>"
-	norminette $(wildcard ./libft/*.c)
-	@echo "<<<===========>>>"
-	norminette $(wildcard ./libft/*.h)
-
 fclean: clean
 	make -C $(LIB_DIR) fclean
 	/bin/rm -f $(NAME)
@@ -81,4 +73,4 @@ re: fclean $(NAME)
 love:
 	@echo "Not all."
 
-.PHONY: clean all fclean re love norme
+.PHONY: clean all fclean re love

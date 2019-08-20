@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   universal_operations.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/30 11:12:07 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/12 18:05:14 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/19 19:59:35 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,7 @@ u_int32_t	swap_endianess(u_int32_t x)
 	return (x << 16UL) | (x >> 16UL);
 }
 
-int			get_digest_size(enum e_algo_type t)
+u_int64_t	swap_endianess_64(u_int64_t x)
 {
-	if (t == TYPE_MD5)
-		return (4);
-	else if (t == TYPE_SHA256)
-		return (8);
-	else if (t == TYPE_WHIRLPOOL)
-		return (8);
-	else
-		return (1);
+	return (__builtin_bswap64(x));
 }

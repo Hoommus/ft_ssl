@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_ssl.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:36 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/13 19:38:51 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/19 17:30:42 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@
 # define ALGO_WHIRLPOOL "WHIRLPOOL"
 
 # define MAGIC_MESSAGE  0xCAFE
-# define MAGIC_ITERATOR 0xBABE
 # define MAGIC_CIPHER   0x1337
 
 enum					e_algo_type
@@ -85,14 +84,7 @@ struct					s_message
 	u_int64_t		magic;
 	struct s_meta	meta;
 	u_int8_t		*data;
-	u_int32_t		a;
-	u_int32_t		b;
-	u_int32_t		c;
-	u_int32_t		d;
-	u_int32_t		e;
-	u_int32_t		f;
-	u_int32_t		g;
-	u_int32_t		h;
+	u_int64_t		hash[8];
 	__uint128_t		bit_size;
 };
 
@@ -145,7 +137,7 @@ int						read_fd(int fd, char **result, __uint128_t *size);
 
 void					print_usage(const char *algo_name);
 void					print_digest(unsigned char *digest, size_t size);
-void print_digest_from_msg(struct s_message *msg);
+void					print_digest_from_msg(struct s_message *msg);
 void					print_error(char *cause, char *error);
 
 /*
@@ -153,25 +145,31 @@ void					print_error(char *cause, char *error);
 */
 
 u_int32_t				swap_endianess(u_int32_t x);
-
+u_int64_t				swap_endianess_64(u_int64_t x);
 /*
-** TYPE_MD5 (md5/algorithm.c)
+** MD5 (md5/algorithm.c)
 */
 
 void					md5_oneshot(struct s_processable *const generic);
 void					md5_iterative(struct s_processable *generic);
 
 /*
-** TYPE_SHA256
+** SHA256
 */
 
 void					sha256_oneshot(struct s_processable *const generic);
 void					sha256_iterative(struct s_processable *const generic);
 
 /*
+** WHIRLPOOL
+*/
+
+void					whirlpool_oneshot(struct s_processable *const generic);
+void					whirlpool_iterative(struct s_processable *const generic);
+
+/*
 ** Auxiliary
 */
 
-const char				*algo_name(enum e_algo_type type);
 
 #endif

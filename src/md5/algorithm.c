@@ -74,22 +74,22 @@ static void				md5_loop_body(const struct s_message *msg,
 {
 	if (j < 16)
 	{
-		*f = (msg->b & msg->c) | ((~msg->b) & msg->d);
+		*f = (msg->hash[1] & msg->hash[2]) | ((~msg->hash[1]) & msg->hash[3]);
 		*g = j;
 	}
 	else if (j < 32)
 	{
-		*f = (msg->d & msg->b) | ((~msg->d) & msg->c);
+		*f = (msg->hash[3] & msg->hash[1]) | ((~msg->hash[3]) & msg->hash[2]);
 		*g = (5 * j + 1) % 16;
 	}
 	else if (j < 48)
 	{
-		*f = (msg->b ^ msg->c ^ msg->d);
+		*f = (msg->hash[1] ^ msg->hash[2] ^ msg->hash[3]);
 		*g = (3 * j + 5) % 16;
 	}
 	else
 	{
-		*f = msg->c ^ (msg->b | (~msg->d));
+		*f = msg->hash[2] ^ (msg->hash[1] | (~msg->hash[3]));
 		*g = (7 * j) % 16;
 	}
 }
@@ -107,11 +107,11 @@ static void				md5_process_chunk(struct s_message *const msg,
 	while (j < 64)
 	{
 		md5_loop_body(msg, j, &f, &g);
-		f += msg->a + g_keys[j] + chunk[g];
-		msg->a = msg->d;
-		msg->d = msg->c;
-		msg->c = msg->b;
-		msg->b = msg->b + ROL(f, g_shifts[j]);
+		f += msg->hash[0] + g_keys[j] + chunk[g];
+		msg->hash[0] = msg->hash[3];
+		msg->hash[3] = msg->hash[2];
+		msg->hash[2] = msg->hash[1];
+		msg->hash[1] = msg->hash[1] + ROL(f, g_shifts[j]);
 		j++;
 	}
 }
@@ -122,18 +122,18 @@ void					md5_iterative(struct s_processable *const generic)
 	struct s_message		*msg;
 
 	msg = (struct s_message *)generic;
-	if (msg->a == 0 && msg->b == 0 && msg->c == 0 && msg->d == 0)
+	if (msg->hash[0] == 0 && msg->hash[1] == 0 && msg->hash[2] == 0 && msg->hash[3] == 0)
 		ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
-	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
+	ft_memcpy(&(msg->hash[0]), magic, sizeof(u_int32_t) * 4);
 	if (msg->meta.data_size < (msg->meta.block_bit_size / 8))
 		md5_preprocess(msg);
 	md5_process_chunk(msg, 0);
-	magic[0] += msg->a;
-	magic[1] += msg->b;
-	magic[2] += msg->c;
-	magic[3] += msg->d;
+	magic[0] += msg->hash[0];
+	magic[1] += msg->hash[1];
+	magic[2] += msg->hash[2];
+	magic[3] += msg->hash[3];
 	if (msg->meta.data_size < (msg->meta.block_bit_size / 8))
-		ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
+		ft_memcpy(&(msg->hash[0]), magic, sizeof(u_int32_t) * 4);
 }
 
 void					md5_oneshot(struct s_processable *const generic)
@@ -146,16 +146,15 @@ void					md5_oneshot(struct s_processable *const generic)
 	msg = (struct s_message *)generic;
 	md5_preprocess(msg);
 	ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
-	ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
+	ft_memcpy(&(msg->hash[0]), magic, sizeof(u_int32_t) * 4);
 	while (i < msg->meta.whole_size)
 	{
 		md5_process_chunk(msg, i);
-		magic[0] += msg->a;
-		magic[1] += msg->b;
-		magic[2] += msg->c;
-		magic[3] += msg->d;
-		ft_memcpy(&(msg->a), magic, sizeof(u_int32_t) * 4);
+		magic[0] += msg->hash[0];
+		magic[1] += msg->hash[1];
+		magic[2] += msg->hash[2];
+		magic[3] += msg->hash[3];
+		ft_memcpy(&(msg->hash[0]), magic, sizeof(u_int32_t) * 4);
 		i += 64;
 	}
-//	ft_bzero(&(msg->a), sizeof(u_int32_t) * 4);
 }
