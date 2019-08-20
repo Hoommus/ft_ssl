@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/14 17:21:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/07 15:51:58 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/20 16:06:09 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
 #include <stdnoreturn.h>
 
-char	*wait_for_input(void)
+char				*wait_for_input(void)
 {
 	char	*line;
 	int		status;
@@ -37,7 +37,9 @@ char	*wait_for_input(void)
 			print_error("stdin", strerror(errno));
 }
 
-noreturn void	shell_loop(void)
+#define VOID_OF_NORETURN noreturn void
+
+VOID_OF_NORETURN	shell_loop(void)
 {
 	char	*command;
 	char	**args;
@@ -57,8 +59,10 @@ noreturn void	shell_loop(void)
 	}
 }
 
-int		main(int argc, char **argv)
+int					main(int argc, char **argv)
 {
+	ft_printf("%lu\n", sizeof(struct s_message));
+	ft_printf("%lu\n", sizeof(struct s_processable));
 	if (argc == 1)
 		shell_loop();
 	else if (execute(argv + 1) == -128)

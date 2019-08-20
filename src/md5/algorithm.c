@@ -44,8 +44,8 @@ static const u_int32_t	g_magic_initial[4] =
 
 static struct s_message	*md5_preprocess(struct s_message *const msg)
 {
-	u_int8_t *swap;
-	const u_int64_t bit_size = msg->meta.whole_size * 8;
+	u_int8_t		*swap;
+	const u_int64_t	bit_size = msg->meta.whole_size * 8;
 
 	msg->bit_size = bit_size;
 	msg->bit_size += 1;
@@ -122,7 +122,10 @@ void					md5_iterative(struct s_processable *const generic)
 	struct s_message		*msg;
 
 	msg = (struct s_message *)generic;
-	if (msg->hash[0] == 0 && msg->hash[1] == 0 && msg->hash[2] == 0 && msg->hash[3] == 0)
+	if (msg->hash[0] == 0 &&
+		msg->hash[1] == 0 &&
+		msg->hash[2] == 0 &&
+		msg->hash[3] == 0)
 		ft_memcpy(magic, g_magic_initial, sizeof(u_int32_t) * 4);
 	ft_memcpy(&(msg->hash[0]), magic, sizeof(u_int32_t) * 4);
 	if (msg->meta.data_size < (msg->meta.block_bit_size / 8))

@@ -6,7 +6,7 @@
 #    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/03/24 10:11:17 by vtarasiu          #+#    #+#              #
-#    Updated: 2019/08/19 17:37:37 by vtarasiu         ###   ########.fr        #
+#    Updated: 2019/08/20 16:11:25 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ LIB_NAME = libftprintf.a
 
 MAIN_SRC = main.c split/quotes.c split/smart_split.c executor.c \
            errors.c output.c parsing.c universal_operations.c \
-           processor.c
+           processor.c processor_args.c
 
 MD5_DIR = md5/
 MD5_SRC = algorithm.c
@@ -34,7 +34,8 @@ SHA256_SRC = algorithm.c
 
 WHIRLPOOL_DIR = whirlpool/
 WHIRLPOOL_SRC = whirlpool.c \
-                whirlpool_sbox.c
+                whirlpool_sbox.c \
+                whirlpool_blocks.c
 
 OBJ = $(addprefix $(OBJ_DIR), $(MAIN_SRC:.c=.o)) \
       $(addprefix $(OBJ_DIR)$(MD5_DIR), $(MD5_SRC:.c=.o)) \

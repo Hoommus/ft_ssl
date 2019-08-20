@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 13:23:09 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/19 19:50:40 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/20 14:33:12 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,6 @@ void print_digest_from_msg(struct s_message *msg)
 	ft_printf("\n");
 }
 
-#include <stdio.h>
-
 void		print_digest(u_int8_t *digest, size_t size)
 {
 	size_t	i;
@@ -66,5 +64,4 @@ void		print_digest(u_int8_t *digest, size_t size)
 	i = 0;
 	while (i < size)
 		ft_printf("%2.2x", digest[i++]);
-	fflush(stdout);
 }

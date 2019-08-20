@@ -33,4 +33,3 @@ int			read_fd(int fd, char **result, __uint128_t *size)
 	*result = data;
 	return ((int)*size);
 }
-

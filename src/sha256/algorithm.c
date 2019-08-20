@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:46 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/20 15:18:33 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/20 15:19:54 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ static void				sha256_process_chunk(struct s_message *const msg,
 	while (j < 64)
 	{
 		tmp1 = (ROR(HASH[4], 6) ^ ROR(HASH[4], 11) ^ ROR(HASH[4], 25)) +
-			SHA256_CH(HASH[4], HASH[5], HASH[6]) + HASH[7]+ g_keys[j] + w[j];
+			SHA256_CH(HASH[4], HASH[5], HASH[6]) + HASH[7] + g_keys[j] + w[j];
 		tmp2 = (ROR(HASH[0], 2) ^ ROR(HASH[0], 13) ^ ROR(HASH[0], 22)) +
 			SHA256_MJ(HASH[0], HASH[1], HASH[2]);
 		msg->hash[7] = msg->hash[6];

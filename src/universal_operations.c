@@ -22,3 +22,13 @@ u_int64_t	swap_endianess_64(u_int64_t x)
 {
 	return (__builtin_bswap64(x));
 }
+
+int			get_argc(char **argv)
+{
+	int		i;
+
+	i = 0;
+	while (argv && argv[i])
+		i++;
+	return (i);
+}

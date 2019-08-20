@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executor.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/18 11:36:42 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/08/13 19:09:20 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/08/20 16:06:56 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 
 static struct option	g_base_opts[] =
 {
-	{"q",        no_argument,        NULL, 'q'},
-	{"r",        no_argument,        NULL, 'r'},
-	{"p",        no_argument,        NULL, 'p'},
-	{"s",        required_argument,  NULL, 's'},
-	{NULL,       0,                  NULL,  0 }
+	{"q", no_argument, NULL, 'q'},
+	{"r", no_argument, NULL, 'r'},
+	{"p", no_argument, NULL, 'p'},
+	{"s", required_argument, NULL, 's'},
+	{NULL, 0, NULL, 0}
 };
 
 static struct s_command	g_commands[] =
@@ -131,7 +131,8 @@ int					help(char **args)
 	return (0);
 }
 
-void				(*get_processor(enum e_algo_type t, bool oneshot))(struct s_processable *)
+void				(*g_get_processor(enum e_algo_type t, bool oneshot))
+	(struct s_processable *)
 {
 	int		i;
 
