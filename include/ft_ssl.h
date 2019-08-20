@@ -166,7 +166,7 @@ void					sha256_iterative(struct s_processable *const generic);
 
 void					whirlpool_oneshot(struct s_processable *const generic);
 void					whirlpool_iterative(struct s_processable *const generic);
-
+void					whirlpool_process_chunk(struct s_message *msg);
 /*
 ** Auxiliary
 */
